@@ -1,0 +1,14 @@
+/* Aturan ini hanya berlaku saat halaman dicetak (Ctrl+P / tombol Cetak) */
+@media print {
+  .navbar,
+  .no-print {
+    display: none !important; /* sembunyikan navbar, tombol, dan form filter */
+  }
+  body {
+    background: #fff !important;
+  }
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}
