@@ -30,7 +30,8 @@ $terbesar = $conn->query("
 
 // ===== 3. Data tabel =====
 $where = "1=1"; $tipe = ""; $param = [];
-if ($q !== '') { $where .= " AND j.nama_jabatan LIKE ?"; $tipe = "s"; $param = ["%$q%"]; }
+// Pencarian sekarang mencocokkan nama ATAU kode jabatan
+if ($q !== '') { $where .= " AND (j.nama_jabatan LIKE ? OR j.kode_jabatan LIKE ?)"; $tipe = "ss"; $param = ["%$q%", "%$q%"]; }
 
 $total = query_aman($conn, "SELECT COUNT(*) n FROM jabatan j WHERE $where", $tipe, $param)->fetch_assoc()['n'];
 $total_halaman = max(1, (int)ceil($total / $per_halaman));
@@ -105,8 +106,8 @@ include '../../includes/header.php';
           <?php foreach ($rows as $i => $r): ?>
             <tr>
               <td><?= $offset + $i + 1 ?></td>
-              <!-- Kode dibuat otomatis dari id, misalnya id 3 menjadi JBT-003 (tidak disimpan di database) -->
-              <td><span class="k-nip"><?= sprintf('JBT-%03d', $r['id']) ?></span></td>
+              <!-- Kode jabatan diambil dari database (bisa diedit lewat form Edit) -->
+              <td><span class="k-nip"><?= h($r['kode_jabatan']) ?></span></td>
               <td>
                 <div class="k-orang">
                   <span class="k-avatar-s kotak"><?= h(strtoupper(substr($r['nama_jabatan'], 0, 1))) ?></span>

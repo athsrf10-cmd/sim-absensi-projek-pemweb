@@ -146,7 +146,8 @@ body.k-app {
 
 /* Kartu filter putih (halaman rekap) */
 .k-card-filter { background: #fff; border-radius: 16px; padding: 22px 24px; margin: 24px 0; box-shadow: 0 2px 12px rgba(15, 40, 100, .06); }
-.k-field label { display: block; font-size: .75rem; font-weight: 600; color: var(--abu); margin-bottom: 6px; }
+/* Hanya judul kolom (label biasa) yang diberi gaya ini, bukan kotak input .k-tool */
+.k-field > label:not(.k-tool) { display: block; font-size: .75rem; font-weight: 600; color: var(--abu); margin-bottom: 6px; }
 .k-field .k-tool { width: 100%; height: 46px; }
 .k-field .k-tool input, .k-field .k-tool select { width: 100%; }
 .k-chip2 { display: inline-flex; align-items: center; gap: 6px; background: #e3eaf9; color: #2a4a99; font-size: .75rem; font-weight: 600; padding: 5px 12px; border-radius: 8px; }
@@ -182,3 +183,57 @@ body.k-app {
   .k-foot, .k-panel-foot .k-paging { display: none !important; }
   .k-page { padding: 0; }
 }
+
+/* ===== Form tambah/edit ===== */
+.k-form-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(15, 40, 100, .06); max-width: 760px; margin: 0 auto; overflow: hidden; }
+.k-form-head { padding: 28px 32px 4px; }
+.k-form-body { padding: 8px 32px 28px; }
+.k-form-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 18px 32px; background: #f6f9ff; border-top: 1px solid var(--garis); }
+
+/* Judul bagian dengan garis di sampingnya */
+.k-form-sec { display: flex; align-items: center; gap: 12px; margin: 24px 0 14px; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--biru); }
+.k-form-sec::after { content: ''; flex: 1; height: 1px; background: var(--garis); }
+
+/* Kolom input saat diketik: border biru */
+.k-tool:focus-within { outline: 2px solid var(--biru); background: #fff; }
+.k-tool.area { height: auto !important; align-items: flex-start; padding-top: 12px; padding-bottom: 12px; }
+.k-tool textarea { border: 0; background: transparent; outline: 0; width: 100%; resize: vertical; font-size: .85rem; color: var(--teks); }
+.k-eye-btn { border: 0; background: transparent; color: var(--abu); padding: 0; }
+.k-hint { font-size: .75rem; color: var(--abu); margin-top: 6px; }
+
+/* ===== Form tambah/edit: kartu bertingkat (kf = karyon form) ===== */
+.kf-wrap { max-width: 840px; margin: 0 auto; }
+.kf-wrap.sempit { max-width: 760px; }
+
+/* Bagian atas halaman: judul di kiri, tombol Kembali di kanan */
+.kf-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+
+/* Kartu putih dengan kepala berlatar biru muda */
+.kf-card { background: #fff; border: 1px solid var(--garis); border-radius: 16px; box-shadow: 0 2px 12px rgba(15, 40, 100, .05); margin-bottom: 22px; overflow: hidden; }
+.kf-card-head { display: flex; align-items: center; gap: 14px; padding: 18px 24px; background: #f8faff; border-bottom: 1px solid var(--garis); }
+.kf-card-head b { display: block; font-size: .95rem; }
+.kf-card-head small { color: var(--abu); font-size: .78rem; }
+.kf-ico { width: 40px; height: 40px; border-radius: 10px; background: #e3eaf9; color: var(--biru); display: grid; place-items: center; font-size: 1.1rem; flex-shrink: 0; }
+.kf-card-body { padding: 24px; }
+.kf-card-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--garis); }
+
+/* Susunan isian: 2 kolom, jadi 1 kolom di layar kecil */
+.kf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.kf-full { grid-column: 1 / -1; }
+@media (max-width: 640px) { .kf-grid { grid-template-columns: 1fr; } }
+
+/* Label dan tanda bintang merah untuk isian wajib */
+.kf-label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: 6px; }
+.kf-label .wajib { color: var(--merah); }
+
+/* Kolom input: ikon di kiri, border biru saat diketik */
+.kf-input { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; background: #f5f8ff; border: 1px solid var(--garis); border-radius: 10px; color: var(--abu); transition: border-color .15s, box-shadow .15s; }
+.kf-input:focus-within { border-color: var(--biru); background: #fff; box-shadow: 0 0 0 3px rgba(11, 79, 201, .12); }
+.kf-input input, .kf-input select, .kf-input textarea { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-size: .88rem; color: var(--teks); }
+.kf-input ::placeholder { color: #9aa5b8; }
+.kf-input.area { height: auto; align-items: flex-start; padding: 12px 14px; }
+.kf-input.area textarea { resize: vertical; min-height: 60px; }
+.kf-hint { font-size: .75rem; color: var(--abu); margin-top: 6px; }
+
+/* Baris tombol di bawah kartu (halaman karyawan) */
+.kf-actions { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; }

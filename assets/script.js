@@ -85,3 +85,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 60000);
   }
 });
+
+// ===== Form: tombol mata password dan input kode huruf besar =====
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Tombol mata: atribut data-target berisi id input password yang dikendalikan
+  document.querySelectorAll('.toggle-pass').forEach(function (tombol) {
+    tombol.addEventListener('click', function () {
+      var input = document.getElementById(tombol.dataset.target);
+      var tampil = input.type === 'password';
+      input.type = tampil ? 'text' : 'password';
+      tombol.innerHTML = tampil ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+    });
+  });
+
+  // Input dengan atribut data-upper: otomatis huruf besar, hanya huruf/angka/strip
+  document.querySelectorAll('[data-upper]').forEach(function (input) {
+    input.addEventListener('input', function () {
+      input.value = input.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+    });
+  });
+});
