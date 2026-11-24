@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.form-hapus').forEach(function (form) {
     form.addEventListener('submit', function (e) {
-      if (!confirm('Yakin ingin menghapus data ini?')) {
+      // form.dataset.konfirmasi = isi atribut data-konfirmasi pada <form>; kalau kosong pakai teks bawaan
+      if (!confirm(form.dataset.konfirmasi || 'Yakin ingin menghapus data ini?')) {
         e.preventDefault();
       }
     });

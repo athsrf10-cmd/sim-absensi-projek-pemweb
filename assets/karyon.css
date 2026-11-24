@@ -182,3 +182,7 @@ body.k-app {
   .k-foot, .k-panel-foot .k-paging { display: none !important; }
   .k-page { padding: 0; }
 }
+
+/* Tombol ikon hapus berwarna merah (dipakai di kolom aksi tabel) */
+.k-aksi-btn.merah { background: #fde2e2; color: #b42318; }
+.k-aksi-btn.merah:hover { background: #fbcfcf; }
