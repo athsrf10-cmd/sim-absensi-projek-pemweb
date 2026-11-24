@@ -379,7 +379,7 @@ a{text-decoration:none}
                 <div><span>Nama Lengkap</span><b><?= h($nama) ?></b></div>
                 <div><span>Departemen</span><b>Information Technology</b></div>
                 <div><span>Jabatan</span><b><?= h($nama_jabatan) ?></b></div>
-                <div><span>Email Kantor</span><b><?= h($profil['email'] ?? '-') ?></b></div>
+                <div><span>Alamat</span><b><?= h($profil['alamat'] ?? '-') ?></b></div>
                 <div><span>No. Handphone</span><b><?= h($no_hp) ?></b></div>
                 <div><span>Status Kerja</span><b class="blue-text">Tetap (Full-time)</b></div>
             </div>

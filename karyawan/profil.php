@@ -29,9 +29,9 @@ $nip          = $profil['nip'] ?? '-';
 
 // Nilai form (diisi ulang kalau ada error)
 $val = [
-    'nama'  => $profil['nama']  ?? '',
-    'email' => $profil['email'] ?? '',
-    'no_hp' => $profil['no_hp'] ?? '',
+    'nama'   => $profil['nama']   ?? '',
+    'no_hp'  => $profil['no_hp']  ?? '',
+    'alamat' => $profil['alamat'] ?? '',
 ];
 $errors = [];
 
@@ -40,23 +40,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!hash_equals($_SESSION['csrf'], $_POST['csrf'] ?? '')) {
         $errors['umum'] = 'Sesi formulir tidak valid. Muat ulang halaman lalu coba lagi.';
     } else {
-        $val['nama']  = trim($_POST['nama']  ?? '');
-        $val['email'] = trim($_POST['email'] ?? '');
-        $val['no_hp'] = trim($_POST['no_hp'] ?? '');
+        $val['nama']   = trim($_POST['nama']   ?? '');
+        $val['no_hp']  = trim($_POST['no_hp']  ?? '');
+        $val['alamat'] = trim($_POST['alamat'] ?? '');
 
         if ($val['nama'] === '')                         $errors['nama'] = 'Nama lengkap wajib diisi.';
         elseif (mb_strlen($val['nama']) > 100)           $errors['nama'] = 'Nama maksimal 100 karakter.';
 
-        if ($val['email'] === '')                        $errors['email'] = 'Email wajib diisi.';
-        elseif (!filter_var($val['email'], FILTER_VALIDATE_EMAIL)) $errors['email'] = 'Format email tidak valid.';
-        elseif (mb_strlen($val['email']) > 100)          $errors['email'] = 'Email maksimal 100 karakter.';
-
+        // kolom no_hp di database: varchar(15)
         if ($val['no_hp'] === '')                        $errors['no_hp'] = 'Nomor handphone wajib diisi.';
-        elseif (!preg_match('/^\+?[0-9]{8,15}$/', $val['no_hp'])) $errors['no_hp'] = 'Gunakan 8–15 digit angka, boleh diawali tanda +.';
+        elseif (!preg_match('/^(?=.{8,15}$)\+?[0-9]+$/', $val['no_hp'])) $errors['no_hp'] = 'Gunakan 8–15 karakter angka, boleh diawali tanda +.';
+
+        if (mb_strlen($val['alamat']) > 500)             $errors['alamat'] = 'Alamat maksimal 500 karakter.';
 
         if (!$errors) {
-            $stmt = $conn->prepare("UPDATE karyawan SET nama = ?, email = ?, no_hp = ? WHERE id = ?");
-            $stmt->bind_param("sssi", $val['nama'], $val['email'], $val['no_hp'], $karyawan_id);
+            $alamat_simpan = $val['alamat'] === '' ? null : $val['alamat'];
+            $stmt = $conn->prepare("UPDATE karyawan SET nama = ?, no_hp = ?, alamat = ? WHERE id = ?");
+            $stmt->bind_param("sssi", $val['nama'], $val['no_hp'], $alamat_simpan, $karyawan_id);
             $stmt->execute();
 
             if (isset($_SESSION['nama'])) $_SESSION['nama'] = $val['nama'];
@@ -170,6 +170,12 @@ a{text-decoration:none}
 
 
 /* ===== KHUSUS HALAMAN EDIT PROFIL ===== */
+.input-wrap.area{align-items:flex-start}
+.input-wrap.area>.bi{top:13px}
+.input-wrap textarea{width:100%;border:1px solid #e3e9f6;background:#f4f7fd;border-radius:9px;padding:11px 14px 11px 36px;font-family:inherit;font-size:11px;color:#1e293b;outline:0;resize:vertical;min-height:78px;line-height:1.6;transition:.15s}
+.input-wrap textarea::placeholder{color:#94a3b8}
+.input-wrap textarea:focus{background:#fff;border-color:#0048c8;box-shadow:0 0 0 3px rgba(0,72,200,.12)}
+.input-wrap.invalid textarea{border-color:#ef4444;background:#fff8f8}
 .account-layout{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
 .profile-hero{text-align:center}
 .profile-hero .big-avatar{width:68px;height:68px;border-radius:50%;background:#0751bd;color:#fff;display:grid;place-items:center;font-size:22px;font-weight:700;margin:4px auto 12px;box-shadow:0 0 0 5px #e3ebfb}
@@ -259,7 +265,7 @@ a{text-decoration:none}
 
       <div class="form-grid">
 
-        <div class="field full">
+        <div class="field">
           <label for="nama">NAMA LENGKAP <em>*</em></label>
           <div class="input-wrap <?= isset($errors['nama']) ? 'invalid' : '' ?>">
             <i class="bi bi-person"></i>
@@ -269,21 +275,21 @@ a{text-decoration:none}
         </div>
 
         <div class="field">
-          <label for="email">EMAIL KANTOR <em>*</em></label>
-          <div class="input-wrap <?= isset($errors['email']) ? 'invalid' : '' ?>">
-            <i class="bi bi-envelope"></i>
-            <input type="email" id="email" name="email" value="<?= h($val['email']) ?>" maxlength="100" placeholder="nama@perusahaan.com" autocomplete="email">
-          </div>
-          <?php if (isset($errors['email'])): ?><span class="err"><?= h($errors['email']) ?></span><?php else: ?><span class="hint">Dipakai untuk pemberitahuan dari sistem.</span><?php endif; ?>
-        </div>
-
-        <div class="field">
           <label for="no_hp">NO. HANDPHONE <em>*</em></label>
           <div class="input-wrap <?= isset($errors['no_hp']) ? 'invalid' : '' ?>">
             <i class="bi bi-telephone"></i>
-            <input type="tel" id="no_hp" name="no_hp" value="<?= h($val['no_hp']) ?>" maxlength="16" placeholder="081234567890" inputmode="tel" autocomplete="tel">
+            <input type="tel" id="no_hp" name="no_hp" value="<?= h($val['no_hp']) ?>" maxlength="15" placeholder="081234567890" inputmode="tel" autocomplete="tel">
           </div>
-          <?php if (isset($errors['no_hp'])): ?><span class="err"><?= h($errors['no_hp']) ?></span><?php else: ?><span class="hint">Contoh: 081234567890 atau +6281234567890</span><?php endif; ?>
+          <?php if (isset($errors['no_hp'])): ?><span class="err"><?= h($errors['no_hp']) ?></span><?php else: ?><span class="hint">Contoh: 081234567890 (maks. 15 karakter)</span><?php endif; ?>
+        </div>
+
+        <div class="field full">
+          <label for="alamat">ALAMAT</label>
+          <div class="input-wrap area <?= isset($errors['alamat']) ? 'invalid' : '' ?>">
+            <i class="bi bi-geo-alt"></i>
+            <textarea id="alamat" name="alamat" rows="3" maxlength="500" placeholder="Masukkan alamat tempat tinggal" autocomplete="street-address"><?= h($val['alamat']) ?></textarea>
+          </div>
+          <?php if (isset($errors['alamat'])): ?><span class="err"><?= h($errors['alamat']) ?></span><?php else: ?><span class="hint">Opsional.</span><?php endif; ?>
         </div>
 
         <div class="section-label">Data Kepegawaian</div>
