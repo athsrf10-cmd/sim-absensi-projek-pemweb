@@ -377,7 +377,6 @@ a{text-decoration:none}
             <div class="profile-data">
                 <div><span>NIP</span><b><?= h($nip) ?></b></div>
                 <div><span>Nama Lengkap</span><b><?= h($nama) ?></b></div>
-                <div><span>Departemen</span><b>Information Technology</b></div>
                 <div><span>Jabatan</span><b><?= h($nama_jabatan) ?></b></div>
                 <div><span>Alamat</span><b><?= h($profil['alamat'] ?? '-') ?></b></div>
                 <div><span>No. Handphone</span><b><?= h($no_hp) ?></b></div>
