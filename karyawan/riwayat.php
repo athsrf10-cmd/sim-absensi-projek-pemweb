@@ -399,7 +399,7 @@ a{text-decoration:none}
 </main>
 
 <footer class="site-footer">
-  <b>© 2026 Karyon HCM Enterprise. All rights reserved.</b><i></i><span>Sistem Informasi Manajemen Presensi &amp; Produktivitas</span>
+  <b>© 2026 Karyon HCM Enterprise. All rights reserved.</b><i></i><span>Sistem Informasi Manajemen &amp; Absensi</span>
 </footer>
 
 </body>
