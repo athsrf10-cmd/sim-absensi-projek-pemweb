@@ -70,6 +70,8 @@ include '../includes/header.php';
     <a href="?<?= http_build_query($filter_url + ['cetak' => 1]) ?>" target="_blank" class="k-btn-putih"><i class="bi bi-printer"></i> Cetak Rekap</a>
   </div>
 </div>
+<!-- Pesan sukses/gagal setelah menghapus absensi -->
+<?php tampil_flash(); ?>
 
 <!-- ===== Kartu filter ===== -->
 <form method="GET" id="form-rekap" class="k-card-filter no-print">
@@ -180,11 +182,21 @@ include '../includes/header.php';
               <td><span class="k-badge st-<?= strtolower($r['status']) ?>"><?= $r['status'] ?></span></td>
               <td class="no-print">
                 <div class="k-aksi">
-                  <!-- Ubah absensi tanggal tersebut lewat form manual -->
-                  <a class="k-aksi-btn" title="Ubah absensi"
+                  <!-- Ikon pensil: ubah absensi tanggal tersebut lewat form manual -->
+                    <a class="k-aksi-btn" title="Ubah absensi"
                      href="absensi_manual.php?karyawan=<?= $r['karyawan_id'] ?>&tanggal=<?= h($r['tanggal']) ?>"><i class="bi bi-pencil"></i></a>
-                </div>
-              </td>
+                     <!-- Ikon tempat sampah: hapus absensi.
+                      class form-hapus: konfirmasi ditangani script.js.
+                      data-konfirmasi: teks yang muncul di kotak konfirmasi -->
+                      <form action="hapus_absensi.php" method="POST" class="d-inline form-hapus"
+                      data-konfirmasi="Hapus absensi <?= h($r['nama']) ?> tanggal <?= date('d-m-Y', strtotime($r['tanggal'])) ?>? Riwayat di halaman karyawan juga ikut terhapus dan tidak bisa dikembalikan.">
+                      <input type="hidden" name="id" value="<?= $r['id'] ?>">
+                      <!-- balik: filter dan halaman saat ini, supaya setelah hapus kembali ke tampilan yang sama -->
+                       <input type="hidden" name="balik" value="<?= h(http_build_query($filter_url + ['page' => $halaman])) ?>">
+                       <button type="submit" class="k-aksi-btn merah" title="Hapus absensi"><i class="bi bi-trash"></i></button>
+                      </form>
+                    </div>
+                 </td>
             </tr>
           <?php endforeach; ?>
         <?php else: ?>
