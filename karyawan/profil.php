@@ -304,7 +304,7 @@ a{text-decoration:none}
           <div class="input-wrap"><i class="bi bi-lock"></i><input type="text" id="jabatan" value="<?= h($nama_jabatan) ?>" readonly></div>
         </div>
 
-        <div class="lock-note"><i class="bi bi-info-circle"></i><span>NIP dan jabatan dikelola oleh HR dan tidak dapat diubah dari halaman ini. Hubungi tim HR Ops bila ada data yang perlu dikoreksi.</span></div>
+        <div class="lock-note"><i class="bi bi-info-circle"></i><span>NIP dan jabatan dikelola oleh HR dan tidak dapat diubah dari halaman ini. Hubungi admin HRD bila ada data yang perlu dikoreksi.</span></div>
       </div>
 
       <div class="form-actions">

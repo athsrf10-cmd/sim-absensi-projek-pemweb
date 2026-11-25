@@ -106,3 +106,20 @@ function render_paging($halaman, $total_halaman, $params) {
         : '<span class="mati"><i class="bi bi-chevron-right"></i></span>';
     echo '</div>';
 }
+
+
+// Hitung jumlah hari kerja (Senin-Jumat) antara dua tanggal (format YYYY-MM-DD).
+// Tanggal awal dan akhir sama-sama ikut dihitung
+function hari_kerja_antara($awal, $akhir) {
+    $jumlah = 0;
+    for ($t = strtotime($awal); $t <= strtotime($akhir); $t += 86400) {
+        if ((int)date('N', $t) <= 5) $jumlah++;   // date('N'): 1 = Senin ... 7 = Minggu
+    }
+    return $jumlah;
+}
+
+// Teks jam kerja standar untuk ditampilkan, diambil dari JAM_MASUK dan JAM_PULANG di koneksi.php.
+// Hasilnya HTML (memakai &ndash;), contoh: 08:00 &ndash; 17:00 WIB
+function jam_kerja_teks() {
+    return substr(JAM_MASUK, 0, 5) . ' &ndash; ' . substr(JAM_PULANG, 0, 5) . ' WIB';
+}

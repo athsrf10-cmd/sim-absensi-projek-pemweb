@@ -87,7 +87,9 @@ $nama_jabatan = $profil['nama_jabatan'] ?? 'Karyawan';
 $nip = $profil['nip'] ?? '-';
 $no_hp = $profil['no_hp'] ?? '-';
 
-$target_hari = 22;
+// Target = jumlah hari kerja (Senin-Jumat) pada bulan ini, bukan angka tetap 22.
+// Perhitungannya sama dengan di riwayat.php supaya kedua halaman selalu cocok
+$target_hari = hari_kerja_antara(date('Y-m-01'), date('Y-m-t'));
 $persentase = min(100, round(($hadir / $target_hari) * 100));
 
 $jam_pulang = $hari_ini['jam_pulang'] ?? null;
@@ -319,7 +321,7 @@ a{text-decoration:none}
                 Selamat <?= (date('H') < 11 ? 'Pagi' : (date('H') < 15 ? 'Siang' : (date('H') < 18 ? 'Sore' : 'Malam'))) ?>,
                 <?= h($nama) ?>
             </h1>
-            <p><i class="bi bi-clock"></i> Jadwal Kerja: 08:00 – 17:00 WIB</p>
+            <p><i class="bi bi-clock"></i> Jadwal Kerja: <?= jam_kerja_teks() ?></p>
         </div>
 
         <div class="welcome-action">
@@ -466,7 +468,7 @@ a{text-decoration:none}
             </div>
 
             <div class="activity-foot">
-                <span><i class="bi bi-shield-check"></i> Data presensi tercatat otomatis dan tersinkronisasi secara real-time</span>
+                <span><i class="bi bi-shield-check"></i> Data presensi tercatat otomatis saat Anda menekan tombol absen</span>
                 <a href="riwayat.php">Lihat Rekap Bulanan</a>
             </div>
         </article>

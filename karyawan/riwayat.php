@@ -43,7 +43,7 @@ while ($r = $res->fetch_assoc()) {
     $r['durasi'] = null;
     if ($ts_masuk && $ts_pulang)                      $r['durasi'] = max(0, $ts_pulang - $ts_masuk);
     elseif ($ts_masuk && $r['tanggal'] === $hari_ini) $r['durasi'] = max(0, $sekarang - $ts_masuk);
-    $r['lembur'] = $ts_pulang ? max(0, $ts_pulang - strtotime($r['tanggal'] . ' 17:00:00')) : 0;
+    $r['lembur'] = $ts_pulang ? max(0, $ts_pulang - strtotime($r['tanggal'] . ' ' . JAM_PULANG)) : 0;
     // Izin/Sakit/Alpha/Cuti dari admin ditampilkan apa adanya, bukan dianggap "Hadir"
     $r['status_label'] = $r['status'] !== 'Hadir' ? $r['status']
         : (!$ts_pulang ? 'Hadir' : ($r['terlambat'] ? 'Terlambat' : 'Tepat Waktu'));
@@ -67,7 +67,6 @@ foreach ($semua as $r) {
 }
 $jam_kerja = number_format($detik_kerja / 3600, 1, '.', '');
 $jam_lembur = number_format($detik_lembur / 3600, 1, '.', '');
-$sisa_cuti = 10; // TODO: ganti dengan data cuti dari database Anda
 
 // ---------- Filter pencarian & status ----------
 $rows = array_values(array_filter($semua, function ($r) use ($cari, $status_filter) {
@@ -297,7 +296,7 @@ a{text-decoration:none}
 <header class="page-intro">
   <div>
     <h1>Riwayat &amp; Log Kehadiran</h1>
-    <p>Catatan rekap kehadiran kerja Anda yang tercatat otomatis dan akurat secara real-time.</p>
+    <p>Catatan rekap kehadiran kerja Anda yang tercatat otomatis oleh sistem.</p>
   </div>
   <div class="intro-tags">
     <span class="green-tag"><i class="bi bi-circle-fill"></i> DATA TERKINI</span>
@@ -333,8 +332,8 @@ a{text-decoration:none}
   <article>
     <small>Sisa Cuti Tahunan</small>
     <span class="stat-icon"><i class="bi bi-umbrella"></i></span>
-    <div class="stat-value"><b><?= (int)$sisa_cuti ?></b><span>Hari Tersedia</span></div>
-    <div class="stat-foot"><span>Periode Tahun <?= date('Y') ?></span><a class="txt-blue" href="cuti.php">Ajukan Cuti</a></div>
+    <div class="stat-value"><b>&mdash;</b><span>Hari</span></div>
+    <div class="stat-foot"><span>Data cuti belum tersedia pada sistem</span></div>
   </article>
 </section>
 
@@ -360,7 +359,7 @@ a{text-decoration:none}
 <section class="history-table-card">
   <div class="emp-card-head">
     <b><i class="bi bi-circle-fill blue-dot"></i> Daftar Kehadiran Harian</b>
-    <span class="history-worktime"><i class="bi bi-circle-fill"></i> Jam Kerja : 08:00 – 17:00 WIB</span>
+    <span class="history-worktime"><i class="bi bi-circle-fill"></i> Jam Kerja : <?= jam_kerja_teks() ?></span>
   </div>
   <table class="history-table">
     <colgroup><col style="width:4.8%"><col style="width:13.1%"><col style="width:11.2%"><col style="width:13.7%"><col style="width:22.3%"><col style="width:14%"><col style="width:20.9%"></colgroup>

@@ -5,6 +5,7 @@ define('BASE_URL', '/sistem-absensi/');
 // ===== Aturan jam kerja (ubah di sini kalau jam kerja berbeda) =====
 define('JAM_MASUK', '08:00:00');   // jam masuk resmi
 define('TOLERANSI_MENIT', 15);     // toleransi keterlambatan (menit)
+define('JAM_PULANG', '17:00:00');   // jam pulang resmi
 
 // Zona waktu PHP ke WIB
 date_default_timezone_set('Asia/Jakarta');

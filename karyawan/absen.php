@@ -238,11 +238,11 @@ a{text-decoration:none}
 <header class="page-intro">
   <div>
     <h1>Presensi Mandiri</h1>
-    <p>Silakan lakukan pencatatan kehadiran harian. Waktu kerja dan lokasi Anda tercatat secara otomatis<br>melalui jaringan kantor yang aman.</p>
+    <p>Silakan lakukan pencatatan kehadiran harian. Waktu masuk dan pulang Anda tercatat otomatis<br>berdasarkan jam server aplikasi.</p>
   </div>
   <div class="intro-tags">
-    <span class="green-tag"><i class="bi bi-circle-fill"></i> Sesi Valid &amp; Terkoneksi</span>
-    <span class="blue-tag"><i class="bi bi-clock"></i> Jam Kerja: 08:00 - 17:00 WIB</span>
+    <span class="green-tag"><i class="bi bi-circle-fill"></i> Sesi login aktif</span>
+    <span class="blue-tag"><i class="bi bi-clock"></i> Jam Kerja: <?= jam_kerja_teks() ?></span>
   </div>
 </header>
 
@@ -278,7 +278,7 @@ a{text-decoration:none}
     <div class="attendance-clock" id="jam">--:--:-- <small>WIB</small></div>
     <div class="attendance-date"><?= h($tanggal_teks) ?></div>
     <?php if (!$sudah_masuk): ?>
-      <p class="sync-note">Waktu Tersinkronisasi Otomatis dengan Server Kantor</p>
+      <p class="sync-note">Waktu mengikuti jam server aplikasi</p>
     <?php else: ?>
       <p class="sync-note big">Waktu Server Resmi (WIB)</p>
     <?php endif; ?>
@@ -304,13 +304,14 @@ a{text-decoration:none}
 
     <div class="attendance-bottom">
       <?php if (!$sudah_masuk): ?>
-        <div><i class="bi bi-alarm"></i><span><small>Jadwal Masuk</small><b>08:00 WIB (toleransi <?= TOLERANSI_MENIT ?> menit)</b></span></div>
+        <div><i class="bi bi-alarm"></i><span><small>Jadwal Masuk</small><b><?= substr(JAM_MASUK, 0, 5) ?> WIB (toleransi <?= TOLERANSI_MENIT ?> menit)</b></span></div>
       <?php else: ?>
         <div><i class="bi bi-circle-half"></i><span><small>Durasi Berjalan</small><b><?= h($durasi) ?></b></span></div>
       <?php endif; ?>
       <div>
         <span class="sync-ico"><i class="bi bi-cloud-check"></i></span>
-        <span><small>Status Sinkronisasi</small><b class="ok">100% Tersimpan</b></span>
+        <!-- Teks mengikuti kondisi nyata: ada data absensi hari ini atau belum -->
+        <span><small>Status Data</small><b class="<?= $sudah_masuk ? 'ok' : '' ?>"><?= $sudah_masuk ? 'Tersimpan di sistem' : 'Belum ada data hari ini' ?></b></span>
       </div>
     </div>
   </article>
@@ -319,12 +320,13 @@ a{text-decoration:none}
     <h3><i class="bi bi-shield-check"></i> Informasi &amp; Panduan Kerja</h3>
     <div class="sub"><?= $sudah_masuk ? 'Ketentuan presensi dan ringkasan kerja hari ini' : 'Informasi jadwal, lokasi, dan ketentuan presensi kerja harian.' ?></div>
 
-    <div class="guide-item"><i class="bi bi-clock"></i><div><small>Jadwal Kerja Aktif</small><b>08:00 - 17:00 WIB</b><span>Senin - Jumat (Hari Kerja Reguler)</span></div></div>
-    <div class="guide-item"><i class="bi bi-buildings-fill"></i><div><small>Lokasi Kantor</small><b>Kantor Pusat Yogyakarta</b><span class="zona">Zona WFO Terverifikasi</span></div></div>
-    <div class="guide-item"><i class="bi bi-info-circle"></i><div><small>Ketentuan Jam Pulang</small><span>Tombol Absen Pulang dapat ditekan setelah pukul 17:00 WIB. Istirahat reguler berlaku pukul 12:00 - 13:00 WIB.</span></div></div>
-    <div class="guide-item"><i class="bi bi-question-circle"></i><div><small>Bantuan &amp; Kendala</small><span>Jika mengalami kendala presensi, hubungi tim HR Ops atau IT Support melalui portal tiket internal.</span></div></div>
-
-    <div class="guide-foot"><span><i class="bi bi-check-circle"></i> Status: Presensi Tercatat Aman</span><small>Sinkron Otomatis</small></div>
+    <div class="guide-item"><i class="bi bi-clock"></i><div><small>Jadwal Kerja Aktif</small><b><?= jam_kerja_teks() ?></b><span>Senin - Jumat (Hari Kerja Reguler)</span></div></div>
+    <!-- Toleransi diambil dari JAM_MASUK dan TOLERANSI_MENIT di config/koneksi.php -->
+    <div class="guide-item"><i class="bi bi-hourglass-split"></i><div><small>Toleransi Keterlambatan</small><b><?= TOLERANSI_MENIT ?> Menit</b><span>Masuk setelah <?= date('H:i', strtotime(JAM_MASUK) + TOLERANSI_MENIT * 60) ?> WIB dihitung terlambat</span></div></div>
+    <div class="guide-item"><i class="bi bi-info-circle"></i><div><small>Ketentuan Jam Pulang</small><span>Absen pulang dicatat saat tombol ditekan. Jangan lupa absen pulang agar durasi kerja Anda tercatat.</span></div></div>
+    <div class="guide-item"><i class="bi bi-question-circle"></i><div><small>Bantuan &amp; Kendala</small><span>Jika mengalami kendala presensi, hubungi admin HRD.</span></div></div>
+    
+    <div class="guide-foot"><span><i class="bi bi-check-circle"></i> Status: <?= $sudah_masuk ? 'Presensi Hari Ini Tercatat' : 'Belum Ada Presensi Hari Ini' ?></span>
   </aside>
 </section>
 <?php endif; ?>
