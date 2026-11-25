@@ -19,7 +19,54 @@ Aplikasi web untuk mengelola data karyawan dan mencatat kehadiran harian. Dibang
 - **Pengajuan Izin & Cuti**: mengajukan izin, sakit, atau cuti dan memantau statusnya.
 - **Profil** dan **Ganti Password**.
 
-## Alur Pengajuan Izin, Sakit & Cuti
+## Alur Sistem
+
+### 1. Login dan Hak Akses
+
+1. Pengguna membuka alamat aplikasi. `index.php` mengarahkan ke halaman login jika belum masuk, atau ke dashboard sesuai peran jika sudah.
+2. Pengguna mengisi username dan password di `auth/login.php`. Data dikirim ke `auth/proses_login.php`.
+3. Sistem mencari username di tabel `users`, lalu mencocokkan password dengan hash-nya (`password_verify`).
+4. Jika cocok, sesi dibuat ulang (`session_regenerate_id`) dan menyimpan `user_id`, `username`, `role`, serta `karyawan_id`. Admin diarahkan ke `admin/dashboard.php`, karyawan ke `karyawan/dashboard.php`.
+5. Jika salah, pengguna kembali ke halaman login dengan pesan gagal.
+6. Setiap halaman memanggil `wajib_role()`. Pengguna yang belum login dikembalikan ke login, dan pengguna yang membuka halaman milik peran lain dialihkan ke dashboard miliknya sendiri. Karyawan tidak bisa membuka halaman admin, begitu juga sebaliknya.
+7. Tombol **Keluar** (`auth/logout.php`) menghapus sesi lalu kembali ke halaman login.
+
+### 2. Absensi Harian Karyawan
+
+1. Karyawan membuka menu **Absen**. Identitas karyawan diambil dari sesi login, bukan dari form, sehingga tidak bisa mengabsenkan orang lain.
+2. Tombol **Absen Masuk** mencatat jam masuk memakai waktu server (WIB) dengan status *Hadir*. Absen masuk hanya bisa sekali per hari.
+3. Absen masuk setelah jam masuk + toleransi (lihat Pengaturan Jam Kerja) ditandai **Terlambat**. Kalau tidak, ditandai **Tepat Waktu**.
+4. Setelah absen masuk, tombol **Absen Pulang** aktif dan mencatat jam pulang. Durasi kerja dihitung dari jam masuk sampai jam pulang.
+5. Jika pada hari itu sudah ada status *Izin*, *Sakit*, *Alpha*, atau *Cuti* (dari pengajuan yang disetujui atau dicatat admin), tombol absen tidak ditampilkan dan karyawan tidak perlu absen.
+6. Hasilnya langsung terlihat di **Dashboard** karyawan (aktivitas terbaru) dan **Riwayat** karyawan, serta di **Dashboard** dan **Rekap Absensi** admin.
+
+### 3. Pengelolaan Data oleh Admin
+
+**Jabatan**
+1. Admin membuka **Jabatan**, lalu menambah jabatan dengan kode dan nama. Kode otomatis huruf besar dan harus unik (huruf, angka, strip; 2-20 karakter).
+2. Jabatan bisa diubah. Jabatan yang masih dipakai karyawan tidak bisa dihapus.
+
+**Karyawan**
+1. Admin membuka **Karyawan** dan menambah karyawan: NIP, nama, jabatan, no. HP, alamat, serta username dan password untuk akun login. Satu kali simpan membuat data karyawan sekaligus akun berperan *karyawan*.
+2. NIP dan username harus unik. No. HP harus 8-15 digit angka. Password minimal 6 karakter dan disimpan dalam bentuk hash.
+3. Saat mengubah data, kolom password boleh dikosongkan jika tidak ingin diganti.
+4. Menghapus karyawan ikut menghapus akun login, seluruh absensi, dan seluruh pengajuannya.
+
+### 4. Pemantauan dan Rekap Absensi
+
+1. **Dashboard admin** menampilkan jumlah karyawan, jabatan, dan kehadiran, serta daftar absensi per tanggal dengan pencarian dan filter status. Halaman menyegarkan diri otomatis tiap 60 detik.
+2. **Rekap Absensi** menampilkan data per periode. Admin memfilter berdasarkan tanggal, karyawan, dan status. Kartu di atas tabel meringkas jumlah per status beserta rasionya.
+3. Dari hasil filter, admin bisa **Export Rekap** ke CSV atau **Cetak Rekap** (semua baris tanpa paginasi).
+4. Tiap baris punya tombol **ubah** (membuka form absensi manual) dan **hapus**. Menghapus absensi juga menghapus riwayatnya di halaman karyawan.
+5. Secara bawaan periode rekap berakhir di hari ini. Untuk melihat izin atau cuti yang sudah disetujui di hari mendatang, perpanjang tanggal "Sampai".
+
+### 5. Catat Absensi Manual
+
+1. Admin membuka form ini lewat tombol **Catat Absensi Manual** di Dashboard, menu **Ubah absensi** pada baris dashboard, atau tombol ubah di Rekap Absensi, lalu memilih karyawan dan tanggal.
+2. Admin mengisi status (*Hadir*, *Izin*, *Sakit*, *Alpha*, atau *Cuti*). Jam masuk dan pulang hanya dipakai untuk *Hadir*. Keterangan hanya dipakai untuk *Izin* dan *Cuti*.
+3. Jika karyawan sudah punya absensi di tanggal itu, datanya diperbarui, bukan digandakan (satu karyawan hanya punya satu baris per tanggal).
+
+### 6. Pengajuan Izin, Sakit & Cuti
 
 1. Karyawan membuka menu **Pengajuan Izin & Cuti**, memilih jenis (Izin / Sakit / Cuti), rentang tanggal, dan alasan, lalu mengirim. Status awal: **Menunggu**. Pengajuan yang masih menunggu bisa dibatalkan oleh karyawan.
 2. Admin membuka menu **Pengajuan Izin & Cuti** (angka merah di menu = jumlah yang menunggu), lalu memilih:
@@ -36,6 +83,12 @@ Aturan pengajuan (bisa diubah di `includes/fungsi.php` dan `karyawan/pengajuan.p
 - Alasan wajib untuk Izin dan Cuti, opsional untuk Sakit.
 - Tanggal tidak boleh bertabrakan dengan pengajuan lain yang berstatus Menunggu atau Disetujui.
 - Baris absensi yang kemudian diubah lewat *Catat Absensi Manual* dilepas dari pengajuan asalnya, jadi tidak ikut terhapus saat pengajuan dihapus.
+
+### 7. Profil dan Ganti Password Karyawan
+
+1. Di **Profil**, karyawan dapat mengubah nama, no. HP, dan alamat. NIP dan jabatan hanya bisa diubah admin.
+2. Di **Ganti Kata Sandi**, karyawan mengisi kata sandi saat ini, kata sandi baru, dan konfirmasi. Kata sandi baru minimal 8 karakter, memuat huruf besar, huruf kecil, dan angka, serta tidak boleh sama dengan yang lama.
+3. Kedua form dilindungi token CSRF.
 
 ## Teknologi
 
@@ -89,6 +142,8 @@ Absen masuk setelah jam masuk + toleransi dihitung **terlambat**. Zona waktu PHP
 sistem-absensi/
 ├── index.php                      # pengarah: ke login / dashboard sesuai peran
 ├── README.md
+├── database/
+│   └── sim_absensi.sql     
 │
 ├── config/
 │   └── koneksi.php                # koneksi database, BASE_URL, aturan jam kerja
