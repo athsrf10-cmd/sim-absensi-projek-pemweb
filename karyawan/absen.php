@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['pesan'] = 'Absen masuk berhasil dicatat.';
         $_SESSION['pesan_tipe'] = 'success';
 
-    } elseif ($aksi === 'pulang' && $hari_ini && $hari_ini['jam_pulang'] === null) {
+    } elseif ($aksi === 'pulang' && $hari_ini && $hari_ini['status'] === 'Hadir' && $hari_ini['jam_pulang'] === null) {
         $stmt = $conn->prepare("UPDATE absensi SET jam_pulang = CURTIME() WHERE id = ?");
         $stmt->bind_param("i", $hari_ini['id']);
         $stmt->execute();
@@ -52,24 +52,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $nama    = $_SESSION['nama'] ?? $_SESSION['nama_lengkap'] ?? $_SESSION['username'] ?? 'Karyawan';
 $jabatan = $_SESSION['jabatan'] ?? 'Karyawan';
 $nip     = $_SESSION['nip'] ?? $karyawan_id;
-try {
-    $q = $conn->prepare("SELECT * FROM karyawan WHERE id = ?");
-    $q->bind_param("i", $karyawan_id);
-    $q->execute();
-    if ($k = $q->get_result()->fetch_assoc()) {
-        $nama    = $k['nama'] ?? $k['nama_lengkap'] ?? $nama;
-        $jabatan = $k['jabatan'] ?? $k['posisi'] ?? $jabatan;
-    }
-} catch (Throwable $e) { /* pakai nilai session */ }
+// Ambil nama, NIP, dan nama jabatan lewat JOIN (sama seperti dashboard.php).
+// Kolom "jabatan" tidak ada di tabel karyawan (adanya jabatan_id), dan NIP tidak disimpan di session
+$q = $conn->prepare("SELECT k.nama, k.nip, j.nama_jabatan
+                     FROM karyawan k LEFT JOIN jabatan j ON k.jabatan_id = j.id
+                     WHERE k.id = ?");
+$q->bind_param("i", $karyawan_id);
+$q->execute();
+if ($k = $q->get_result()->fetch_assoc()) {
+    $nama    = $k['nama'];
+    $jabatan = $k['nama_jabatan'] ?? 'Karyawan';
+    $nip     = $k['nip'];
+}
 
 // ---------- Data tampilan ----------
 $hari  = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 $bulan = [1=>'Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 $tanggal_teks = $hari[(int)date('w')] . ', ' . date('d') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
 
-$sudah_masuk  = (bool)$hari_ini;
-$sudah_pulang = $hari_ini && $hari_ini['jam_pulang'] !== null;
-$tepat_waktu  = $sudah_masuk && strtotime($hari_ini['jam_masuk']) <= strtotime('08:00:59');
+// Baris absensi hari ini bisa berupa Izin/Sakit/Alpha/Cuti yang dicatat admin (jam masuk kosong).
+// Itu BUKAN absen masuk, jadi tombol absen tidak boleh ditampilkan
+$bukan_hadir  = $hari_ini && $hari_ini['status'] !== 'Hadir';
+$sudah_masuk  = $hari_ini && !$bukan_hadir;
+$sudah_pulang = $sudah_masuk && $hari_ini['jam_pulang'] !== null;
+// Pakai terlambat() dari includes/fungsi.php supaya aturannya SAMA dengan sisi admin
+// (jam masuk + toleransi, diatur di config/koneksi.php)
+$tepat_waktu  = $sudah_masuk && !terlambat($hari_ini['jam_masuk']);
 
 $durasi = '00j 00m';
 if ($sudah_masuk) {
@@ -238,6 +246,12 @@ a{text-decoration:none}
   </div>
 </header>
 
+<?php if ($bukan_hadir): ?>
+  <!-- Hari ini sudah dicatat admin sebagai Izin/Sakit/Alpha/Cuti, jadi tidak ada tombol absen -->
+  <div class="alert alert-info">
+    Hari ini tercatat <b><?= h($hari_ini['status']) ?></b> oleh admin, jadi Anda tidak perlu melakukan absen.
+  </div>
+<?php else: ?>
 <section class="attendance-layout">
   <article class="attendance-main">
 
@@ -290,7 +304,7 @@ a{text-decoration:none}
 
     <div class="attendance-bottom">
       <?php if (!$sudah_masuk): ?>
-        <div><i class="bi bi-alarm"></i><span><small>Jadwal Masuk</small><b>Maks. 08:00 WIB</b></span></div>
+        <div><i class="bi bi-alarm"></i><span><small>Jadwal Masuk</small><b>08:00 WIB (toleransi <?= TOLERANSI_MENIT ?> menit)</b></span></div>
       <?php else: ?>
         <div><i class="bi bi-circle-half"></i><span><small>Durasi Berjalan</small><b><?= h($durasi) ?></b></span></div>
       <?php endif; ?>
@@ -313,6 +327,7 @@ a{text-decoration:none}
     <div class="guide-foot"><span><i class="bi bi-check-circle"></i> Status: Presensi Tercatat Aman</span><small>Sinkron Otomatis</small></div>
   </aside>
 </section>
+<?php endif; ?>
 
 </main>
 

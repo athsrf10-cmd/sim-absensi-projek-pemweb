@@ -18,7 +18,9 @@ $bulan = $_GET['bulan'] ?? date('Y-m');
 if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $bulan)) $bulan = date('Y-m');
 $cari          = trim($_GET['cari'] ?? '');
 $status_filter = $_GET['status'] ?? '';
-if (!in_array($status_filter, ['', 'Hadir', 'Tepat Waktu', 'Terlambat'], true)) $status_filter = '';
+// Pilihan filter: status kehadiran + status dari admin (Izin/Sakit/Alpha, dan Cuti kalau sudah ada di DAFTAR_STATUS)
+$daftar_filter = array_merge(['Hadir', 'Tepat Waktu', 'Terlambat'], array_values(array_diff(DAFTAR_STATUS, ['Hadir'])));
+if (!in_array($status_filter, array_merge([''], $daftar_filter), true)) $status_filter = '';
 
 $awal  = $bulan . '-01';
 $akhir = date('Y-m-t', strtotime($awal));
@@ -36,18 +38,22 @@ $hari_ini = date('Y-m-d');
 while ($r = $res->fetch_assoc()) {
     $ts_masuk  = $r['jam_masuk']  ? strtotime($r['tanggal'] . ' ' . $r['jam_masuk'])  : null;
     $ts_pulang = $r['jam_pulang'] ? strtotime($r['tanggal'] . ' ' . $r['jam_pulang']) : null;
-    $r['terlambat'] = $ts_masuk && $r['jam_masuk'] > '08:00:59';
+    // terlambat() dari includes/fungsi.php: aturan sama dengan sisi admin (jam masuk + toleransi)
+    $r['terlambat'] = $ts_masuk && terlambat($r['jam_masuk']);
     $r['durasi'] = null;
     if ($ts_masuk && $ts_pulang)                      $r['durasi'] = max(0, $ts_pulang - $ts_masuk);
     elseif ($ts_masuk && $r['tanggal'] === $hari_ini) $r['durasi'] = max(0, $sekarang - $ts_masuk);
     $r['lembur'] = $ts_pulang ? max(0, $ts_pulang - strtotime($r['tanggal'] . ' 17:00:00')) : 0;
-    $r['status_label'] = !$ts_pulang ? 'Hadir' : ($r['terlambat'] ? 'Terlambat' : 'Tepat Waktu');
+    // Izin/Sakit/Alpha/Cuti dari admin ditampilkan apa adanya, bukan dianggap "Hadir"
+    $r['status_label'] = $r['status'] !== 'Hadir' ? $r['status']
+        : (!$ts_pulang ? 'Hadir' : ($r['terlambat'] ? 'Terlambat' : 'Tepat Waktu'));
     $r['hari_nama'] = $nama_hari[(int)date('w', strtotime($r['tanggal']))];
     $semua[] = $r;
 }
 
 // ---------- Statistik ----------
-$total_hadir = count($semua);
+// Hanya baris berstatus Hadir yang dihitung sebagai kehadiran (sebelumnya semua baris ikut terhitung)
+$total_hadir = count(array_filter($semua, function ($r) { return $r['status'] === 'Hadir'; }));
 $hari_kerja = 0;
 for ($t = strtotime($awal); $t <= strtotime($akhir); $t += 86400) {
     if ((int)date('N', $t) <= 5) $hari_kerja++;
@@ -117,15 +123,18 @@ if (!isset($opsi_bulan[$bulan])) $opsi_bulan[$bulan] = $label_bulan;
 $nama    = $_SESSION['nama'] ?? $_SESSION['nama_lengkap'] ?? $_SESSION['username'] ?? 'Karyawan';
 $jabatan = $_SESSION['jabatan'] ?? 'Karyawan';
 $nip     = $_SESSION['nip'] ?? $karyawan_id;
-try {
-    $q = $conn->prepare("SELECT * FROM karyawan WHERE id = ?");
-    $q->bind_param("i", $karyawan_id);
-    $q->execute();
-    if ($k = $q->get_result()->fetch_assoc()) {
-        $nama    = $k['nama'] ?? $k['nama_lengkap'] ?? $nama;
-        $jabatan = $k['jabatan'] ?? $k['posisi'] ?? $jabatan;
-    }
-} catch (Throwable $e) { }
+// Ambil nama, NIP, dan nama jabatan lewat JOIN (sama seperti dashboard.php).
+// Kolom "jabatan" tidak ada di tabel karyawan (adanya jabatan_id), dan NIP tidak disimpan di session
+$q = $conn->prepare("SELECT k.nama, k.nip, j.nama_jabatan
+                     FROM karyawan k LEFT JOIN jabatan j ON k.jabatan_id = j.id
+                     WHERE k.id = ?");
+$q->bind_param("i", $karyawan_id);
+$q->execute();
+if ($k = $q->get_result()->fetch_assoc()) {
+    $nama    = $k['nama'];
+    $jabatan = $k['nama_jabatan'] ?? 'Karyawan';
+    $nip     = $k['nip'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -224,6 +233,10 @@ a{text-decoration:none}
 .still{display:inline-block;background:#eef1f9;color:#64748b;font-style:italic;font-size:9.5px;padding:3px 8px;border-radius:4px}
 .activity-badge{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 10px;border-radius:999px;font-size:8.5px;font-weight:700;background:#6ee7b7;color:#065f46}
 .activity-badge.late{background:#fde68a;color:#92400e}
+.activity-badge.st-izin{background:#dfe9ff;color:#1d4ed8}
+.activity-badge.st-sakit{background:#fdf0d5;color:#9a6700}
+.activity-badge.st-alpha{background:#fde2e2;color:#b42318}
+.activity-badge.st-cuti{background:#ede4ff;color:#6d28d9}
 .activity-badge .dot{font-size:5px}
 .empty-state{text-align:center!important;color:#64748b;height:90px!important}
 
@@ -336,7 +349,7 @@ a{text-decoration:none}
     <label class="ctl stat"><i class="bi bi-list-ul"></i>
       <select name="status" onchange="this.form.submit()">
         <option value="">Semua Status Kehadiran</option>
-        <?php foreach (['Hadir','Tepat Waktu','Terlambat'] as $s): ?><option value="<?= h($s) ?>" <?= $s === $status_filter ? 'selected' : '' ?>><?= h($s) ?></option><?php endforeach; ?>
+        <?php foreach ($daftar_filter as $s): ?><option value="<?= h($s) ?>" <?= $s === $status_filter ? 'selected' : '' ?>><?= h($s) ?></option><?php endforeach; ?>
       </select><i class="bi bi-chevron-down chev"></i>
     </label>
     <a class="btn-x" href="<?= h($url_excel) ?>"><i class="bi bi-table"></i> Ekspor ke Excel</a>
@@ -362,13 +375,18 @@ a{text-decoration:none}
         <td>
           <?php if ($r['jam_pulang']): ?>
             <span class="time-cell out"><i class="bi bi-box-arrow-left"></i><?= h($r['jam_pulang']) ?></span>
+          <?php elseif ($r['status'] !== 'Hadir'): ?>
+            <span class="still">—</span>
           <?php else: ?>
             <span class="still">--:-- (Masih Bekerja)</span>
           <?php endif; ?>
         </td>
         <td><b><?= fmt_durasi($r['durasi']) ?></b></td>
         <td>
-          <?php if ($r['status_label'] === 'Hadir'): ?>
+          <?php if ($r['status'] !== 'Hadir'): ?>
+            <!-- Status dari admin (Izin/Sakit/Alpha/Cuti) -->
+            <span class="activity-badge st-<?= strtolower($r['status']) ?>"><?= h($r['status']) ?></span>
+          <?php elseif ($r['status_label'] === 'Hadir'): ?>
             <span class="activity-badge"><i class="bi bi-circle-fill dot"></i> Hadir</span>
           <?php elseif ($r['status_label'] === 'Tepat Waktu'): ?>
             <span class="activity-badge"><i class="bi bi-check-circle"></i> Tepat Waktu</span>

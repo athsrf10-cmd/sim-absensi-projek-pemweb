@@ -95,6 +95,10 @@ $jam_pulang = $hari_ini['jam_pulang'] ?? null;
 if (!$hari_ini) {
     $status_tombol = 'masuk';
     $teks_tombol = 'Presensi Masuk';
+} elseif ($hari_ini['status'] !== 'Hadir') {
+    // Izin/Sakit/Alpha/Cuti yang dicatat admin bukan absen masuk, jadi tidak ada aksi absen
+    $status_tombol = 'selesai';
+    $teks_tombol = 'Lihat Status';
 } elseif ($jam_pulang === null) {
     $status_tombol = 'pulang';
     $teks_tombol = 'Presensi Pulang';
@@ -246,6 +250,12 @@ a{text-decoration:none}
 .activity-badge.waiting{color:#64748b;background:#e9eefc}
 .activity-badge.done{color:#07865e;background:#d4fae9}
 .activity-badge.working{color:#0751bd;background:#dce8ff}
+/* Warna badge untuk Hadir Terlambat dan status dari admin (Izin/Sakit/Alpha/Cuti) */
+.activity-badge.late{color:#92400e;background:#fde68a}
+.activity-badge.st-izin{color:#1d4ed8;background:#dfe9ff}
+.activity-badge.st-sakit{color:#9a6700;background:#fdf0d5}
+.activity-badge.st-alpha{color:#b42318;background:#fde2e2}
+.activity-badge.st-cuti{color:#6d28d9;background:#ede4ff}
 .empty-state{color:#64748b;font-size:12px;text-align:center;padding:25px 10px}
 .activity-foot{margin-top:auto;padding-top:15px;border-top:1px solid #edf0f6;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:9px;color:#64748b}
 .activity-foot i{color:#07865e;margin-right:4px}
@@ -316,7 +326,9 @@ a{text-decoration:none}
             <div class="welcome-right">
                 <div class="welcome-clock" id="jam-dashboard">--:--:-- <small>WIB</small></div>
                 <div class="welcome-status">
-                    <?php if ($hari_ini && $jam_pulang !== null): ?>
+                    <?php if ($hari_ini && $hari_ini['status'] !== 'Hadir'): ?>
+                        <i class="bi bi-info-circle-fill"></i> Hari Ini: <?= h($hari_ini['status']) ?>
+                    <?php elseif ($hari_ini && $jam_pulang !== null): ?>
                         <i class="bi bi-check-circle-fill"></i> Presensi Selesai
                     <?php elseif ($hari_ini): ?>
                         <i class="bi bi-check-circle-fill"></i> Presensi Masuk: <?= h($hari_ini['jam_masuk']) ?> WIB
@@ -370,7 +382,7 @@ a{text-decoration:none}
                 <div class="profile-avatar"><?= h($inisial) ?></div>
                 <div>
                     <b><?= h($nama) ?></b>
-                    <small><?= h($nama_jabatan) ?> • Departemen IT</small>
+                    <small><?= h($nama_jabatan) ?></small>
                 </div>
             </div>
 
@@ -405,9 +417,17 @@ a{text-decoration:none}
                         $tanggal_absen = date('Y-m-d', strtotime($r['tanggal']));
                         $is_today = ($tanggal_absen === date('Y-m-d'));
 
-                        if ($r['jam_pulang'] !== null) {
-                            $badge_text = 'Hadir Tepat Waktu';
-                            $badge_class = 'done';
+                        // Izin/Sakit/Alpha/Cuti dari admin: tampilkan statusnya apa adanya
+                        $bukan_hadir = ($r['status'] !== 'Hadir');
+
+                        if ($bukan_hadir) {
+                            $badge_text = $r['status'];
+                            $badge_class = 'st-' . strtolower($r['status']);
+                        } elseif ($r['jam_pulang'] !== null) {
+                            // Cek terlambat dengan aturan yang sama seperti sisi admin
+                            $telat = $r['jam_masuk'] && terlambat($r['jam_masuk']);
+                            $badge_text = $telat ? 'Hadir Terlambat' : 'Hadir Tepat Waktu';
+                            $badge_class = $telat ? 'late' : 'done';
                         } elseif ($is_today) {
                             $badge_text = 'Aktif Bekerja';
                             $badge_class = 'working';
@@ -424,12 +444,16 @@ a{text-decoration:none}
                                     <?= $is_today ? ' • ' . tanggalSingkat($r['tanggal'], $hari_indonesia, $bulan_indonesia) : '' ?>
                                 </b>
                                 <small>
+                                    <?php if ($bukan_hadir): ?>
+                                        Tidak ada jam masuk/pulang &nbsp; • &nbsp; Status: <?= h($r['status']) ?>
+                                    <?php else: ?>
                                     Jam Masuk: <?= h($r['jam_masuk'] ?? '--:--:--') ?> WIB
                                     &nbsp; • &nbsp;
                                     <?php if ($r['jam_pulang'] !== null): ?>
                                         Jam Pulang: <?= h($r['jam_pulang']) ?> WIB
                                     <?php else: ?>
                                         Status: <?= $is_today ? 'Sedang Bertugas' : 'Belum Presensi Pulang' ?>
+                                    <?php endif; ?>
                                     <?php endif; ?>
                                 </small>
                             </div>
