@@ -5,7 +5,7 @@ wajib_role('admin');
 
 // ===== 1. Ambil dan bersihkan filter =====
 $dari   = bersihkan_tanggal($_GET['dari'] ?? '', date('Y-m-01'));   // default: tanggal 1 bulan ini
-$sampai = bersihkan_tanggal($_GET['sampai'] ?? '', date('Y-m-d'));  // default: hari ini
+$sampai = bersihkan_tanggal($_GET['sampai'] ?? '', date('Y-m-t'));  // default: akhir bulan
 if ($dari > $sampai) { [$dari, $sampai] = [$sampai, $dari]; }      // kalau terbalik, ditukar
 $karyawan = (int)($_GET['karyawan'] ?? 0);
 $status   = in_array($_GET['status'] ?? '', DAFTAR_STATUS) ? $_GET['status'] : '';
