@@ -29,6 +29,7 @@ fputcsv($out, ['Tanggal', 'NIP', 'Nama', 'Jabatan', 'Jam Masuk', 'Jam Pulang', '
 while ($r = $hasil->fetch_assoc()) {
     // Keterangan hanya untuk yang punya jam masuk
     $ket = $r['jam_masuk'] ? (terlambat($r['jam_masuk']) ? 'Terlambat' : 'Tepat Waktu') : '-';
+    if (!empty($r['keterangan'])) $ket = $r['keterangan'];
     fputcsv($out, [$r['tanggal'], $r['nip'], $r['nama'], $r['nama_jabatan'], $r['jam_masuk'], $r['jam_pulang'], $r['status'], $ket]);
 }
 fclose($out);

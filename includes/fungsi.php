@@ -1,6 +1,11 @@
 <?php
 // Daftar status absensi yang valid (dipakai untuk validasi dan dropdown)
-const DAFTAR_STATUS = ['Hadir', 'Izin', 'Sakit', 'Alpha'];
+const DAFTAR_STATUS = ['Hadir', 'Izin', 'Sakit', 'Alpha', 'Cuti'];
+
+// Jenis pengajuan yang bisa diajukan karyawan, dan status proses pengajuan
+const JENIS_PENGAJUAN  = ['Izin', 'Sakit', 'Cuti'];
+const STATUS_PENGAJUAN = ['Menunggu', 'Disetujui', 'Ditolak'];
+const MAKS_HARI_PENGAJUAN = 60; // batas rentang tanggal satu pengajuan (hari kalender)
 
 // Singkatan htmlspecialchars: mencegah kode berbahaya (XSS) tampil di halaman
 function h($teks) {
@@ -122,4 +127,22 @@ function hari_kerja_antara($awal, $akhir) {
 // Hasilnya HTML (memakai &ndash;), contoh: 08:00 &ndash; 17:00 WIB
 function jam_kerja_teks() {
     return substr(JAM_MASUK, 0, 5) . ' &ndash; ' . substr(JAM_PULANG, 0, 5) . ' WIB';
+}
+
+// Format tanggal d-m-Y; kalau mulai = selesai tampil satu tanggal saja
+function rentang_tanggal($mulai, $selesai) {
+    $a = date('d-m-Y', strtotime($mulai));
+    $b = date('d-m-Y', strtotime($selesai));
+    return $a === $b ? $a : $a . ' s/d ' . $b;
+}
+
+// Kelas warna lencana status pengajuan: Menunggu / Disetujui / Ditolak
+function kelas_status_pengajuan($status) {
+    return 'pg-' . strtolower($status);
+}
+
+// Jumlah pengajuan yang menunggu keputusan admin (untuk lencana di menu)
+function jumlah_pengajuan_menunggu($conn) {
+    $r = $conn->query("SELECT COUNT(*) n FROM pengajuan WHERE status = 'Menunggu'");
+    return $r ? (int)$r->fetch_assoc()['n'] : 0;
 }

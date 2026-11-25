@@ -18,6 +18,10 @@ try {
     $stmt->bind_param("i", $id);
     $stmt->execute();
 
+    $stmt = $conn->prepare("DELETE FROM pengajuan WHERE karyawan_id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+
     $stmt = $conn->prepare("DELETE FROM users WHERE karyawan_id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();

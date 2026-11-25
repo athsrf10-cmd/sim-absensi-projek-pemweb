@@ -47,6 +47,8 @@ $nama_tampil  = ucfirst($_SESSION['username']);
           <li class="nav-item"><a class="nav-link <?= menu_aktif('admin/karyawan/') ?>" href="<?= BASE_URL ?>admin/karyawan/index.php">Karyawan</a></li>
           <li class="nav-item"><a class="nav-link <?= menu_aktif('admin/jabatan/') ?>" href="<?= BASE_URL ?>admin/jabatan/index.php">Jabatan</a></li>
           <li class="nav-item"><a class="nav-link <?= menu_aktif('rekap_absensi') ?>" href="<?= BASE_URL ?>admin/rekap_absensi.php">Rekap Absensi</a></li>
+          <?php $jml_menunggu = jumlah_pengajuan_menunggu($conn); ?>
+          <li class="nav-item"><a class="nav-link <?= menu_aktif('admin/pengajuan') ?>" href="<?= BASE_URL ?>admin/pengajuan.php">Pengajuan Izin &amp; Cuti<?php if ($jml_menunggu > 0): ?><span class="k-notif"><?= $jml_menunggu ?></span><?php endif; ?></a></li>
         <?php else: ?>
           <li class="nav-item"><a class="nav-link <?= menu_aktif('karyawan/dashboard') ?>" href="<?= BASE_URL ?>karyawan/dashboard.php">Dashboard</a></li>
           <li class="nav-item"><a class="nav-link <?= menu_aktif('karyawan/absen') ?>" href="<?= BASE_URL ?>karyawan/absen.php">Absen</a></li>

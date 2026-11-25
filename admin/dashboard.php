@@ -8,7 +8,7 @@ $tanggal = $_GET['tanggal'] ?? date('Y-m-d');
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) $tanggal = date('Y-m-d'); // validasi format
 $q      = trim($_GET['q'] ?? '');
 $status = $_GET['status'] ?? '';
-if (!in_array($status, ['Hadir', 'Izin', 'Sakit', 'Alpha'])) $status = '';
+if (!in_array($status, DAFTAR_STATUS)) $status = '';
 $halaman     = max(1, (int)($_GET['page'] ?? 1));
 $per_halaman = 5; // jumlah baris per halaman
 
@@ -22,7 +22,7 @@ $belum_absen = max($total_karyawan - $tercatat_hari_ini, 0);
 $persen_hadir = $total_karyawan > 0 ? round($hadir_hari_ini / $total_karyawan * 100) : 0;
 
 // ===== 3. Jumlah per status pada tanggal yang dipilih (untuk isi dropdown) =====
-$hitung = ['Hadir' => 0, 'Izin' => 0, 'Sakit' => 0, 'Alpha' => 0];
+$hitung = array_fill_keys(DAFTAR_STATUS, 0);
 $stmt = $conn->prepare("SELECT status, COUNT(*) n FROM absensi WHERE tanggal = ? GROUP BY status");
 $stmt->bind_param("s", $tanggal);
 $stmt->execute();
@@ -202,7 +202,12 @@ include '../includes/header.php';
               </td>
 
               <!-- Warna lencana mengikuti status: st-hadir / st-izin / st-sakit / st-alpha -->
-              <td><span class="k-badge st-<?= strtolower($r['status']) ?>"><?= $r['status'] ?></span></td>
+               <td>
+               <span class="k-badge st-<?= strtolower($r['status']) ?>"><?= $r['status'] ?></span>
+               <?php if (!empty($r['keterangan'])): ?>
+                <span class="k-alasan"><?= h($r['keterangan']) ?></span>
+               <?php endif; ?>
+               </td>
 
               <td>
                 <div class="k-aksi">

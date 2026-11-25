@@ -281,6 +281,7 @@ a{text-decoration:none}
     <a href="dashboard.php">Dashboard</a>
     <a href="absen.php">Absen</a>
     <a href="riwayat.php" class="active">Riwayat</a>
+    <a href="pengajuan.php">Pengajuan Izin &amp; Cuti</a>
   </div>
   <div class="user-area">
     <div class="user">

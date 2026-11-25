@@ -186,3 +186,25 @@ body.k-app {
 /* Tombol ikon hapus berwarna merah (dipakai di kolom aksi tabel) */
 .k-aksi-btn.merah { background: #fde2e2; color: #b42318; }
 .k-aksi-btn.merah:hover { background: #fbcfcf; }
+
+/* ===== Status Cuti + fitur Pengajuan Izin & Cuti ===== */
+.st-cuti { background: #ede4ff; color: #6d28d9; }
+.p-cuti { background: #8b5cf6; }
+
+/* Lencana status pengajuan */
+.pg-menunggu { background: #fdf0d5; color: #9a6700; }
+.pg-disetujui { background: #d9f3e7; color: #0b7a50; }
+.pg-ditolak { background: #fde2e2; color: #b42318; }
+
+/* Keterangan kecil di bawah lencana (alasan izin/cuti) */
+.k-alasan { display: block; max-width: 220px; margin-top: 4px; font-size: .72rem; color: var(--abu); white-space: normal; line-height: 1.35; }
+
+/* Lencana jumlah pengajuan menunggu di menu admin */
+.k-notif { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; border-radius: 99px; background: var(--merah); color: #fff; font-size: .68rem; font-weight: 700; }
+
+/* Kartu statistik jadi 5 kolom di halaman rekap */
+.k-stats.lima { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 1100px) { .k-stats.lima { grid-template-columns: repeat(2, 1fr); } }
+
+.k-aksi-btn.hijau { background: #d9f3e7; color: #0b7a50; }
+.k-aksi-btn.hijau:hover { background: #bfebd5; }

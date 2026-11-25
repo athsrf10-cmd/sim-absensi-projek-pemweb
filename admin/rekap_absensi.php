@@ -51,6 +51,7 @@ $kartu = [
     'Izin'  => ['ikon' => 'bi-journal-check',   'warna' => 'izin'],
     'Sakit' => ['ikon' => 'bi-bandaid',         'warna' => 'sakit'],
     'Alpha' => ['ikon' => 'bi-x-circle',        'warna' => 'alpha'],
+    'Cuti'  => ['ikon' => 'bi-umbrella',        'warna' => 'cuti'],
 ];
 
 include '../includes/header.php';
@@ -120,7 +121,7 @@ include '../includes/header.php';
 </div>
 
 <!-- ===== 4 kartu ringkasan status ===== -->
-<div class="k-stats" style="margin-top:0">
+<div class="k-stats lima" style="margin-top:0">
   <?php foreach ($kartu as $nama_status => $k): ?>
     <div class="k-stat">
       <div class="k-stat-top"><?= strtoupper($nama_status) ?> <span class="k-stat-ico"><i class="bi <?= $k['ikon'] ?>"></i></span></div>
@@ -179,7 +180,13 @@ include '../includes/header.php';
               </td>
               <td class="k-jam"><?= $r['jam_pulang'] ?? '--:--:--' ?></td>
               <td class="k-jam"><?= durasi($r['jam_masuk'], $r['jam_pulang']) ?></td>
-              <td><span class="k-badge st-<?= strtolower($r['status']) ?>"><?= $r['status'] ?></span></td>
+              <td>
+                <span class="k-badge st-<?= strtolower($r['status']) ?>"><?= $r['status'] ?></span>
+                <?php if (!empty($r['keterangan'])): ?>
+                  <!-- Alasan izin/cuti dari pengajuan karyawan -->
+                  <span class="k-alasan"><?= h($r['keterangan']) ?></span>
+                <?php endif; ?>
+              </td>
               <td class="no-print">
                 <div class="k-aksi">
                   <!-- Ikon pensil: ubah absensi tanggal tersebut lewat form manual -->

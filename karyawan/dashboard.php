@@ -64,7 +64,7 @@ $total_jam = number_format($detik / 3600, 1);
 
 // ================= AKTIVITAS TERBARU =================
 $stmt = $conn->prepare("
-    SELECT tanggal, jam_masuk, jam_pulang, status
+    SELECT tanggal, jam_masuk, jam_pulang, status, keterangan
     FROM absensi
     WHERE karyawan_id = ?
     ORDER BY tanggal DESC
@@ -297,6 +297,7 @@ a{text-decoration:none}
     <a href="dashboard.php" class="active">Dashboard</a>
     <a href="absen.php">Absen</a>
     <a href="riwayat.php">Riwayat</a>
+    <a href="pengajuan.php">Pengajuan Izin &amp; Cuti</a>
   </div>
   <div class="user-area">
     <div class="user">
@@ -447,7 +448,7 @@ a{text-decoration:none}
                                 </b>
                                 <small>
                                     <?php if ($bukan_hadir): ?>
-                                        Tidak ada jam masuk/pulang &nbsp; • &nbsp; Status: <?= h($r['status']) ?>
+                                        Tidak ada jam masuk/pulang &nbsp; • &nbsp; Status: <?= h($r['status']) ?><?= !empty($r['keterangan']) ? ' &nbsp; • &nbsp; ' . h($r['keterangan']) : '' ?>
                                     <?php else: ?>
                                     Jam Masuk: <?= h($r['jam_masuk'] ?? '--:--:--') ?> WIB
                                     &nbsp; • &nbsp;
