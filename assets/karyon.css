@@ -208,3 +208,41 @@ body.k-app {
 
 .k-aksi-btn.hijau { background: #d9f3e7; color: #0b7a50; }
 .k-aksi-btn.hijau:hover { background: #bfebd5; }
+
+/* ===== Form tambah / ubah (karyawan & jabatan) ===== */
+.kf-wrap { max-width: 880px; margin: 0 auto; }
+.kf-wrap.sempit { max-width: 640px; }
+.kf-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 22px; }
+
+.kf-card { background: #fff; border: 1px solid var(--garis); border-radius: 16px; box-shadow: 0 4px 18px rgba(11, 79, 201, .05); margin-bottom: 20px; overflow: hidden; }
+.kf-card-head { display: flex; align-items: center; gap: 14px; padding: 18px 24px; border-bottom: 1px solid var(--garis); }
+.kf-card-head b { display: block; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; }
+.kf-card-head small { display: block; margin-top: 2px; font-size: .8rem; color: var(--abu); }
+.kf-ico { flex-shrink: 0; width: 42px; height: 42px; border-radius: 12px; background: var(--bg-lembut); color: var(--biru); display: grid; place-items: center; font-size: 1.2rem; }
+.kf-card-body { padding: 24px; }
+.kf-card-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--garis); background: #fafcff; }
+
+.kf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; }
+.kf-full { grid-column: 1 / -1; }
+.kf-label { display: block; margin-bottom: 6px; font-size: .82rem; font-weight: 600; color: var(--teks); }
+.wajib { color: var(--merah); }
+
+/* Kotak isian: ikon di kiri + input di kanan */
+.kf-input { display: flex; align-items: center; gap: 10px; padding: 0 14px; background: #f5f8ff; border: 1px solid var(--garis); border-radius: 10px; transition: border-color .15s, box-shadow .15s, background .15s; }
+.kf-input:focus-within { background: #fff; border-color: var(--biru); box-shadow: 0 0 0 3px rgba(11, 79, 201, .12); }
+.kf-input > i { color: var(--abu); }
+.kf-input input, .kf-input select, .kf-input textarea { flex: 1; min-width: 0; padding: 11px 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: .9rem; color: var(--teks); }
+.kf-input textarea { min-height: 72px; resize: vertical; }
+.kf-input.area { align-items: flex-start; }
+.kf-input.area > i { margin-top: 13px; }
+.kf-hint { margin-top: 6px; font-size: .75rem; color: var(--abu); }
+
+/* Tombol mata (tampilkan / sembunyikan password) */
+.k-eye-btn { border: 0; background: transparent; padding: 4px; color: var(--abu); cursor: pointer; }
+.k-eye-btn:hover { color: var(--biru); }
+
+.kf-actions { display: flex; justify-content: flex-end; gap: 10px; }
+@media (max-width: 700px) {
+  .kf-grid { grid-template-columns: 1fr; }
+  .kf-top { flex-direction: column; }
+}
